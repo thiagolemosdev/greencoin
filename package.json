@@ -1,0 +1,71 @@
+{
+  "name": "spa-blueprint",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:mock": "VITE_MSW=true vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . && oxlint src",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run test:unit && npm run test:browser && npm run test:integration",
+    "test:unit": "vitest run --project unit",
+    "test:browser": "vitest run --project browser",
+    "test:integration": "vitest run --project integration",
+    "test:watch": "vitest watch",
+    "generate:routes": "tsr generate"
+  },
+  "dependencies": {
+    "@base-ui-components/react": "^1.0.0-rc.0",
+    "@lukemorales/query-key-factory": "^1.3.4",
+    "@tanstack/form-core": "^0.41.0",
+    "@tanstack/query-core": "^5.80.0",
+    "@tanstack/react-form": "^0.41.0",
+    "@tanstack/react-query": "^5.80.0",
+    "@tanstack/react-router": "^1.120.0",
+    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.13.6",
+    "@tanstack/react-query-devtools": "^5.80.0",
+    "@tanstack/router-devtools": "^1.120.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "motion": "^12.15.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "sonner": "^2.0.5",
+    "tailwind-merge": "^3.3.0",
+    "valibot": "^1.1.0",
+    "zustand": "^5.0.5"
+  },
+  "devDependencies": {
+    "@tanstack/valibot-form-adapter": "^0.41.0",
+    "@tailwindcss/vite": "^4.1.7",
+    "@tanstack/router-plugin": "^1.120.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.5.2",
+    "@vitest/browser": "^3.2.0",
+    "eslint": "^9.27.0",
+    "eslint-plugin-boundaries": "^5.0.1",
+    "eslint-plugin-oxlint": "^0.17.0",
+    "msw": "^2.8.7",
+    "oxlint": "^0.17.0",
+    "playwright": "^1.52.0",
+    "tailwindcss": "^4.1.7",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.32.1",
+    "vite": "^6.3.5",
+    "vite-bundle-visualizer": "^1.2.1",
+    "vitest": "^3.2.0"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
+  }
+}
