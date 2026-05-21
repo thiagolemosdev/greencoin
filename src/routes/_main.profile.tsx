@@ -71,8 +71,8 @@ function ProfileSkeleton() {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 function ProfilePage() {
-  const { user } = useAuth();
-  const { data: profile, isLoading } = useProfile(user?.id ?? "");
+  const { user, isLoading: authLoading } = useAuth();
+  const { data: profile, isLoading: profileLoading } = useProfile(user?.id ?? "");
   const uploadAvatar = useUploadAvatar(user?.id ?? "");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -82,7 +82,7 @@ function ProfilePage() {
     e.target.value = "";
   }
 
-  if (isLoading) return <ProfileSkeleton />;
+  if (authLoading || profileLoading) return <ProfileSkeleton />;
   if (!profile) return null;
 
   const initials = getInitials(profile.name);

@@ -1,4 +1,4 @@
-import { useState, useCallback, type ReactNode } from "react";
+import { useState, useCallback, useEffect, type ReactNode } from "react";
 import { AuthContext, type AuthUser } from "@core/auth-context";
 import { useSessionStore } from "@core/session-store";
 import { httpResource, defineApiRoute } from "@core/http-resource";
@@ -15,9 +15,9 @@ export type AuthProviderProps = {
 };
 
 export function AuthProvider({ children, initialUser = null }: AuthProviderProps) {
-  const { setTokens, clearSession } = useSessionStore();
+  const { accessToken, setTokens, clearSession } = useSessionStore();
   const [user, setUser] = useState<AuthUser | null>(initialUser);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(() => Boolean(accessToken));
 
   const signIn = useCallback(
     async (credentials: { email: string; password: string }) => {
@@ -47,6 +47,15 @@ export function AuthProvider({ children, initialUser = null }: AuthProviderProps
   const refreshUser = useCallback(async () => {
     const data = await httpResource<AuthUser>(meRoute);
     setUser(data);
+  }, []);
+
+  useEffect(() => {
+    if (!accessToken) {
+      setIsLoading(false);
+      return;
+    }
+    void refreshUser().finally(() => setIsLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
