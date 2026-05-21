@@ -4,9 +4,14 @@ export type AppSettings = {
   notifications: {
     email: boolean;
     push: boolean;
+    orderUpdates: boolean;
+    marketAlerts: boolean;
   };
   theme: "light" | "dark" | "system";
-  language: string;
+  language: "pt" | "en";
+  security: {
+    twoFactor: boolean;
+  };
 };
 
 export type UpdateSettingsRequest = Partial<AppSettings>;

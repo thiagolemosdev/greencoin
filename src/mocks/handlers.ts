@@ -488,13 +488,23 @@ export const handlers = [
   }),
 
   // Settings
+  let SETTINGS_DB = {
+    notifications: { email: true, push: false, orderUpdates: true, marketAlerts: false },
+    theme: "system" as "light" | "dark" | "system",
+    language: "pt" as "pt" | "en",
+    security: { twoFactor: false },
+  };
+
   http.get(`${API_BASE_URL}/settings`, async () => {
     await delay(LATENCY);
-    return HttpResponse.json({
-      notifications: { email: true, push: false },
-      theme: "system",
-      language: "en",
-    });
+    return HttpResponse.json(SETTINGS_DB);
+  }),
+
+  http.patch(`${API_BASE_URL}/settings`, async ({ request }) => {
+    await delay(300);
+    const body = await request.json() as Partial<typeof SETTINGS_DB>;
+    SETTINGS_DB = { ...SETTINGS_DB, ...body };
+    return HttpResponse.json(SETTINGS_DB);
   }),
 
   // Feature A

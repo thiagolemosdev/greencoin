@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { updateSettings } from "@core/api/settings";
 import { settingsQueryOptions } from "@core/queries";
 import { queryKeys } from "@core/keys";
+import { toast } from "sonner";
 import type { UpdateSettingsRequest } from "@core/api/settings";
 
 export function useSettings() {
@@ -14,6 +15,8 @@ export function useUpdateSettings() {
     mutationFn: (body: UpdateSettingsRequest) => updateSettings(body),
     onSuccess: (updated) => {
       queryClient.setQueryData(queryKeys.settings.all.queryKey, updated);
+      toast.success("Configurações salvas");
     },
+    onError: () => toast.error("Erro ao salvar configurações"),
   });
 }
