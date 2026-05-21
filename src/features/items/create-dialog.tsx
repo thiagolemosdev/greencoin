@@ -1,5 +1,5 @@
 import { valibotValidator } from "@tanstack/valibot-form-adapter";
-import { useAppForm } from "@pattern/form.hooks";
+import { useAppForm, FieldContext } from "@pattern/form.hooks";
 import { ManagedTextField, FormActions } from "@pattern/form";
 import { CreateItemSchema, type CreateItemValues } from "@features/items/schemas";
 import { useCreateItem } from "@features/items/hooks";
@@ -54,14 +54,18 @@ export function CreateItemDialog({ open, onClose }: CreateItemDialogProps) {
           className="p-5 space-y-4"
         >
           <form.Field name="title">
-            {() => (
-              <ManagedTextField label="Título" name="title" placeholder="Nome do item" required />
+            {(field) => (
+              <FieldContext.Provider value={{ field }}>
+                <ManagedTextField label="Título" name="title" placeholder="Nome do item" required />
+              </FieldContext.Provider>
             )}
           </form.Field>
 
           <form.Field name="description">
-            {() => (
-              <ManagedTextField label="Descrição" name="description" placeholder="Descrição opcional" />
+            {(field) => (
+              <FieldContext.Provider value={{ field }}>
+                <ManagedTextField label="Descrição" name="description" placeholder="Descrição opcional" />
+              </FieldContext.Provider>
             )}
           </form.Field>
 

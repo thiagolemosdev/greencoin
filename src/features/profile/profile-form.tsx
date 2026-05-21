@@ -1,6 +1,6 @@
 import { valibotValidator } from "@tanstack/valibot-form-adapter";
 import { Button } from "@ui/button";
-import { useAppForm } from "@pattern/form.hooks";
+import { useAppForm, FieldContext } from "@pattern/form.hooks";
 import { ManagedTextField, FormActions } from "@pattern/form";
 import { UpdateProfileSchema, type UpdateProfileValues } from "@features/profile/schemas";
 import { useUpdateProfile } from "@features/profile/hooks";
@@ -36,14 +36,18 @@ export function ProfileForm({ profile }: ProfileFormProps) {
       className="flex flex-col gap-4 rounded-lg border bg-white p-6"
     >
       <form.Field name="name">
-        {() => (
-          <ManagedTextField label="Name" name="name" required />
+        {(field) => (
+          <FieldContext.Provider value={{ field }}>
+            <ManagedTextField label="Name" name="name" required />
+          </FieldContext.Provider>
         )}
       </form.Field>
 
       <form.Field name="bio">
-        {() => (
-          <ManagedTextField label="Bio" name="bio" hint="A short description about yourself." />
+        {(field) => (
+          <FieldContext.Provider value={{ field }}>
+            <ManagedTextField label="Bio" name="bio" hint="A short description about yourself." />
+          </FieldContext.Provider>
         )}
       </form.Field>
 

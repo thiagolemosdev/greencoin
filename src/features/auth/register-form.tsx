@@ -3,7 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { register } from "@core/api/auth";
 import { useAuth } from "@core/auth-context";
 import { Button } from "@ui/button";
-import { useAppForm } from "@pattern/form.hooks";
+import { useAppForm, FieldContext } from "@pattern/form.hooks";
 import { ManagedTextField, FormActions } from "@pattern/form";
 import { RegisterSchema, type RegisterValues } from "@features/auth/schemas";
 
@@ -31,17 +31,31 @@ export function RegisterForm() {
       className="flex flex-col gap-4"
     >
       <form.Field name="name">
-        {() => <ManagedTextField label="Name" name="name" required />}
+        {(field) => (
+          <FieldContext.Provider value={{ field }}>
+            <ManagedTextField label="Name" name="name" required />
+          </FieldContext.Provider>
+        )}
       </form.Field>
       <form.Field name="email">
-        {() => <ManagedTextField label="Email" name="email" type="email" required />}
+        {(field) => (
+          <FieldContext.Provider value={{ field }}>
+            <ManagedTextField label="Email" name="email" type="email" required />
+          </FieldContext.Provider>
+        )}
       </form.Field>
       <form.Field name="password">
-        {() => <ManagedTextField label="Password" name="password" type="password" required />}
+        {(field) => (
+          <FieldContext.Provider value={{ field }}>
+            <ManagedTextField label="Password" name="password" type="password" required />
+          </FieldContext.Provider>
+        )}
       </form.Field>
       <form.Field name="confirmPassword">
-        {() => (
-          <ManagedTextField label="Confirm password" name="confirmPassword" type="password" required />
+        {(field) => (
+          <FieldContext.Provider value={{ field }}>
+            <ManagedTextField label="Confirm password" name="confirmPassword" type="password" required />
+          </FieldContext.Provider>
         )}
       </form.Field>
       <FormActions className="mt-2 flex-col">

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { valibotValidator } from "@tanstack/valibot-form-adapter";
-import { useAppForm } from "@pattern/form.hooks";
+import { useAppForm, FieldContext } from "@pattern/form.hooks";
 import { ManagedTextField } from "@pattern/form";
 import { useCreateCryptoOrder } from "@features/orders/hooks";
 import { createOrderSchema } from "@core/schemas/crypto";
@@ -207,26 +207,30 @@ function CreateOrderPage() {
         {/* Linha: Quantidade + Preço por unidade */}
         <div className="grid grid-cols-2 gap-4">
           <form.Field name="amount">
-            {() => (
-              <ManagedTextField
-                label="Quantidade"
-                name="amount"
-                placeholder="0.00"
-                hint="Ex: 0.5 para 0.5 BTC"
-                required
-              />
+            {(field) => (
+              <FieldContext.Provider value={{ field }}>
+                <ManagedTextField
+                  label="Quantidade"
+                  name="amount"
+                  placeholder="0.00"
+                  hint="Ex: 0.5 para 0.5 BTC"
+                  required
+                />
+              </FieldContext.Provider>
             )}
           </form.Field>
 
           <form.Field name="pricePerUnit">
-            {() => (
-              <ManagedTextField
-                label="Preço por unidade"
-                name="pricePerUnit"
-                placeholder="0.00"
-                hint="Preço em USD ou BRL"
-                required
-              />
+            {(field) => (
+              <FieldContext.Provider value={{ field }}>
+                <ManagedTextField
+                  label="Preço por unidade"
+                  name="pricePerUnit"
+                  placeholder="0.00"
+                  hint="Preço em USD ou BRL"
+                  required
+                />
+              </FieldContext.Provider>
             )}
           </form.Field>
         </div>

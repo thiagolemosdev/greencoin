@@ -1,7 +1,7 @@
 import { valibotValidator } from "@tanstack/valibot-form-adapter";
 import { Dialog, DialogContent, DialogClose } from "@ui/dialog";
 import { Button } from "@ui/button";
-import { useAppForm } from "@pattern/form.hooks";
+import { useAppForm, FieldContext } from "@pattern/form.hooks";
 import { ManagedTextField, FormActions } from "@pattern/form";
 import { FeatureBDialogSchema, type FeatureBDialogValues } from "@features/feature-b/schemas";
 import { useFeatureBSubmit } from "@features/feature-b/hooks";
@@ -41,10 +41,18 @@ export function FeatureBDialog({ open, onClose }: FeatureBDialogProps) {
           className="flex flex-col gap-4"
         >
           <form.Field name="subject">
-            {() => <ManagedTextField label="Subject" name="subject" required />}
+            {(field) => (
+              <FieldContext.Provider value={{ field }}>
+                <ManagedTextField label="Subject" name="subject" required />
+              </FieldContext.Provider>
+            )}
           </form.Field>
           <form.Field name="notes">
-            {() => <ManagedTextField label="Notes" name="notes" />}
+            {(field) => (
+              <FieldContext.Provider value={{ field }}>
+                <ManagedTextField label="Notes" name="notes" />
+              </FieldContext.Provider>
+            )}
           </form.Field>
           <FormActions>
             <DialogClose asChild>
