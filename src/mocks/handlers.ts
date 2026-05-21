@@ -141,6 +141,147 @@ const ORDERS_DB: OrderRow[] = [
   },
 ];
 
+// ==================== MARKETPLACE DB ====================
+type MarketplaceOfferRow = {
+  id: string;
+  order: {
+    id: string;
+    userId: string;
+    type: "buy" | "sell";
+    crypto: "BTC" | "USDT";
+    amount: string;
+    pricePerUnit: string;
+    totalPrice: string;
+    currency: "USD" | "BRL";
+    status: "open" | "matched" | "completed" | "cancelled";
+    expiresAt: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  seller: {
+    id: string;
+    name: string;
+    rating: number;
+    completedTrades: number;
+  };
+};
+
+type TransactionRow = {
+  id: string;
+  orderId: string;
+  buyerId: string;
+  sellerId: string;
+  crypto: "BTC" | "USDT";
+  blockchain: "bitcoin" | "ethereum";
+  amount: string;
+  pricePerUnit: string;
+  totalPrice: string;
+  currency: "USD" | "BRL";
+  status: "pending" | "confirmed" | "completed" | "failed" | "disputed";
+  buyerWalletAddress: string;
+  sellerWalletAddress: string;
+  transactionHash?: string;
+  completedAt?: string;
+  failedReason?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+const MARKETPLACE_DB: MarketplaceOfferRow[] = [
+  {
+    id: "offer-1",
+    order: {
+      id: "mkt-order-1",
+      userId: "user-2",
+      type: "sell",
+      crypto: "BTC",
+      amount: "0.25",
+      pricePerUnit: "94500.00",
+      totalPrice: "23625.00",
+      currency: "USD",
+      status: "open",
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3).toISOString(),
+      createdAt: "2024-04-01T10:00:00Z",
+      updatedAt: "2024-04-01T10:00:00Z",
+    },
+    seller: { id: "user-2", name: "Carlos M.", rating: 4.9, completedTrades: 87 },
+  },
+  {
+    id: "offer-2",
+    order: {
+      id: "mkt-order-2",
+      userId: "user-3",
+      type: "sell",
+      crypto: "USDT",
+      amount: "5000",
+      pricePerUnit: "1.01",
+      totalPrice: "5050.00",
+      currency: "USD",
+      status: "open",
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 12).toISOString(),
+      createdAt: "2024-04-02T08:00:00Z",
+      updatedAt: "2024-04-02T08:00:00Z",
+    },
+    seller: { id: "user-3", name: "Ana P.", rating: 4.7, completedTrades: 43 },
+  },
+  {
+    id: "offer-3",
+    order: {
+      id: "mkt-order-3",
+      userId: "user-4",
+      type: "buy",
+      crypto: "BTC",
+      amount: "0.1",
+      pricePerUnit: "93000.00",
+      totalPrice: "9300.00",
+      currency: "USD",
+      status: "open",
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 48).toISOString(),
+      createdAt: "2024-04-03T14:30:00Z",
+      updatedAt: "2024-04-03T14:30:00Z",
+    },
+    seller: { id: "user-4", name: "Rafael S.", rating: 5.0, completedTrades: 212 },
+  },
+  {
+    id: "offer-4",
+    order: {
+      id: "mkt-order-4",
+      userId: "user-5",
+      type: "sell",
+      crypto: "BTC",
+      amount: "1.0",
+      pricePerUnit: "96000.00",
+      totalPrice: "96000.00",
+      currency: "BRL",
+      status: "open",
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 72).toISOString(),
+      createdAt: "2024-04-04T09:00:00Z",
+      updatedAt: "2024-04-04T09:00:00Z",
+    },
+    seller: { id: "user-5", name: "Julia F.", rating: 4.8, completedTrades: 65 },
+  },
+  {
+    id: "offer-5",
+    order: {
+      id: "mkt-order-5",
+      userId: "user-6",
+      type: "buy",
+      crypto: "USDT",
+      amount: "2000",
+      pricePerUnit: "0.99",
+      totalPrice: "1980.00",
+      currency: "USD",
+      status: "open",
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 6).toISOString(),
+      createdAt: "2024-04-05T11:00:00Z",
+      updatedAt: "2024-04-05T11:00:00Z",
+    },
+    seller: { id: "user-6", name: "Pedro L.", rating: 4.6, completedTrades: 31 },
+  },
+];
+
+const TRANSACTIONS_DB: TransactionRow[] = [];
+
 // ==================== ITEMS DB ====================
 const ITEMS_DB = [
   { id: "1", title: "First item", description: "A sample item", status: "active", createdAt: "2024-01-01T00:00:00Z", updatedAt: "2024-01-10T00:00:00Z" },
@@ -450,5 +591,95 @@ export const handlers = [
     addr.isVerified = true;
     addr.verificationHash = `0x${Math.random().toString(16).slice(2)}`;
     return HttpResponse.json(addr);
+  }),
+
+  // ==================== MARKETPLACE ====================
+
+  http.get(`${API_BASE_URL}/crypto/marketplace`, async ({ request }) => {
+    await delay(LATENCY);
+    const url = new URL(request.url);
+    let offers = MARKETPLACE_DB.filter((o) => o.order.status === "open");
+    const crypto = url.searchParams.get("crypto");
+    const type = url.searchParams.get("type");
+    const currency = url.searchParams.get("currency");
+    const minPrice = url.searchParams.get("minPrice");
+    const maxPrice = url.searchParams.get("maxPrice");
+    const sortBy = url.searchParams.get("sortBy") ?? "newest";
+    if (crypto) offers = offers.filter((o) => o.order.crypto === crypto);
+    if (type) offers = offers.filter((o) => o.order.type === type);
+    if (currency) offers = offers.filter((o) => o.order.currency === currency);
+    if (minPrice) offers = offers.filter((o) => parseFloat(o.order.pricePerUnit) >= parseFloat(minPrice));
+    if (maxPrice) offers = offers.filter((o) => parseFloat(o.order.pricePerUnit) <= parseFloat(maxPrice));
+    if (sortBy === "price_asc") offers.sort((a, b) => parseFloat(a.order.pricePerUnit) - parseFloat(b.order.pricePerUnit));
+    else if (sortBy === "price_desc") offers.sort((a, b) => parseFloat(b.order.pricePerUnit) - parseFloat(a.order.pricePerUnit));
+    else offers.sort((a, b) => b.order.createdAt.localeCompare(a.order.createdAt));
+    return HttpResponse.json(offers);
+  }),
+
+  http.get(`${API_BASE_URL}/crypto/marketplace/:orderId`, async ({ params }) => {
+    await delay(LATENCY);
+    const offer = MARKETPLACE_DB.find((o) => o.id === params["orderId"]);
+    if (!offer) {
+      return HttpResponse.json(
+        { type: "friendly_error", title: "Not found", detail: "Oferta não encontrada.", status: 404 },
+        { status: 404, headers: { "content-type": "application/problem+json" } },
+      );
+    }
+    return HttpResponse.json(offer);
+  }),
+
+  // ==================== TRANSACTIONS ====================
+
+  http.get(`${API_BASE_URL}/crypto/transactions`, async () => {
+    await delay(LATENCY);
+    return HttpResponse.json(
+      TRANSACTIONS_DB.filter((t) => t.buyerId === "user-1" || t.sellerId === "user-1")
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+    );
+  }),
+
+  http.post(`${API_BASE_URL}/crypto/transactions`, async ({ request }) => {
+    await delay(LATENCY);
+    const body = await request.json() as { orderId: string; walletId: string };
+    const offer = MARKETPLACE_DB.find((o) => o.order.id === body.orderId);
+    if (!offer) {
+      return HttpResponse.json(
+        { type: "friendly_error", title: "Not found", detail: "Oferta não encontrada.", status: 404 },
+        { status: 404, headers: { "content-type": "application/problem+json" } },
+      );
+    }
+    const wallet = WALLETS_DB.find((w) => w.id === body.walletId);
+    const newTx: TransactionRow = {
+      id: `tx-${Date.now()}`,
+      orderId: body.orderId,
+      buyerId: offer.order.type === "sell" ? "user-1" : offer.order.userId,
+      sellerId: offer.order.type === "sell" ? offer.order.userId : "user-1",
+      crypto: offer.order.crypto,
+      blockchain: offer.order.crypto === "BTC" ? "bitcoin" : "ethereum",
+      amount: offer.order.amount,
+      pricePerUnit: offer.order.pricePerUnit,
+      totalPrice: offer.order.totalPrice,
+      currency: offer.order.currency,
+      status: "pending",
+      buyerWalletAddress: wallet?.address ?? "",
+      sellerWalletAddress: offer.seller.id,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    TRANSACTIONS_DB.push(newTx);
+    offer.order.status = "matched";
+    return HttpResponse.json(newTx, { status: 201 });
+  }),
+
+  http.get(`${API_BASE_URL}/crypto/transactions/:transactionId`, async ({ params }) => {
+    await delay(LATENCY);
+    const tx = TRANSACTIONS_DB.find((t) => t.id === params["transactionId"]);
+    if (!tx) {
+      return HttpResponse.json(
+        { type: "friendly_error", title: "Not found", detail: "Transação não encontrada.", status: 404 },
+        { status: 404, headers: { "content-type": "application/problem+json" } },
+      );
+    }
+    return HttpResponse.json(tx);
   }),
 ];
