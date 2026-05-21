@@ -28,10 +28,10 @@ export function useConfirmCryptoTransaction() {
       cryptoTransactionApi.confirmTransaction(data),
     onSuccess: (transaction) => {
       queryClient.invalidateQueries({
-        queryKey: queryKeys.crypto.transactions.my().queryKey,
+        queryKey: queryKeys.cryptoTransactions.my().queryKey,
       });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.crypto.transactions.detail(transaction.id).queryKey,
+        queryKey: queryKeys.cryptoTransactions.detail(transaction.id).queryKey,
       });
       toast.success('Transação confirmada com sucesso!');
     },
@@ -54,10 +54,10 @@ export function useDisputeCryptoTransaction() {
     }) => cryptoTransactionApi.disputeTransaction(transactionId, reason),
     onSuccess: (transaction) => {
       queryClient.invalidateQueries({
-        queryKey: queryKeys.crypto.transactions.my().queryKey,
+        queryKey: queryKeys.cryptoTransactions.my().queryKey,
       });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.crypto.transactions.detail(transaction.id).queryKey,
+        queryKey: queryKeys.cryptoTransactions.detail(transaction.id).queryKey,
       });
       toast.success('Transação marcada como disputada');
     },

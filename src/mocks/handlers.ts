@@ -280,7 +280,80 @@ const MARKETPLACE_DB: MarketplaceOfferRow[] = [
   },
 ];
 
-const TRANSACTIONS_DB: TransactionRow[] = [];
+const TRANSACTIONS_DB: TransactionRow[] = [
+  {
+    id: "tx-1",
+    orderId: "order-3",
+    buyerId: "user-2",
+    sellerId: "user-1",
+    crypto: "USDT",
+    blockchain: "ethereum",
+    amount: "500",
+    pricePerUnit: "1.02",
+    totalPrice: "510.00",
+    currency: "USD",
+    status: "completed",
+    buyerWalletAddress: "0x742d35Cc6634C0532925a3b8D4C9B5a5e3d6f4A",
+    sellerWalletAddress: "0x9A8f72Bb3C4d1f0E2F91aB7D5C6E8f3A4b2D9c1",
+    transactionHash: "0xabc123def456abc123def456abc123def456abc123def456abc123def456abc1",
+    completedAt: "2024-02-27T16:00:00Z",
+    createdAt: "2024-02-25T08:00:00Z",
+    updatedAt: "2024-02-27T16:00:00Z",
+  },
+  {
+    id: "tx-2",
+    orderId: "mkt-order-6",
+    buyerId: "user-1",
+    sellerId: "user-3",
+    crypto: "BTC",
+    blockchain: "bitcoin",
+    amount: "0.05",
+    pricePerUnit: "91000.00",
+    totalPrice: "4550.00",
+    currency: "USD",
+    status: "pending",
+    buyerWalletAddress: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+    sellerWalletAddress: "bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq",
+    createdAt: "2024-04-06T10:00:00Z",
+    updatedAt: "2024-04-06T10:00:00Z",
+  },
+  {
+    id: "tx-3",
+    orderId: "mkt-order-7",
+    buyerId: "user-4",
+    sellerId: "user-1",
+    crypto: "USDT",
+    blockchain: "ethereum",
+    amount: "1200",
+    pricePerUnit: "1.00",
+    totalPrice: "1200.00",
+    currency: "USD",
+    status: "confirmed",
+    buyerWalletAddress: "0x3fA2B7c9D1e8F4a0B5C6d2E9f3A7b8C4d1E2f5A",
+    sellerWalletAddress: "0x742d35Cc6634C0532925a3b8D4C9B5a5e3d6f4A",
+    transactionHash: "0xdef789abc123def789abc123def789abc123def789abc123def789abc123def7",
+    createdAt: "2024-04-05T14:00:00Z",
+    updatedAt: "2024-04-05T18:00:00Z",
+  },
+  {
+    id: "tx-4",
+    orderId: "mkt-order-8",
+    buyerId: "user-1",
+    sellerId: "user-5",
+    crypto: "BTC",
+    blockchain: "bitcoin",
+    amount: "0.2",
+    pricePerUnit: "95500.00",
+    totalPrice: "19100.00",
+    currency: "USD",
+    status: "disputed",
+    buyerWalletAddress: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+    sellerWalletAddress: "bc1q9h7cj7v8k2l3m4n5p6q7r8s9t0u1v2w3x4y5z",
+    failedReason: "Vendedor não enviou os fundos dentro do prazo.",
+    createdAt: "2024-04-03T09:00:00Z",
+    updatedAt: "2024-04-04T11:00:00Z",
+  },
+];
 
 // ==================== ITEMS DB ====================
 const ITEMS_DB = [
@@ -680,6 +753,38 @@ export const handlers = [
         { status: 404, headers: { "content-type": "application/problem+json" } },
       );
     }
+    return HttpResponse.json(tx);
+  }),
+
+  http.put(`${API_BASE_URL}/crypto/transactions/:transactionId/confirm`, async ({ request, params }) => {
+    await delay(LATENCY);
+    const tx = TRANSACTIONS_DB.find((t) => t.id === params["transactionId"]);
+    if (!tx) {
+      return HttpResponse.json(
+        { type: "friendly_error", title: "Not found", detail: "Transação não encontrada.", status: 404 },
+        { status: 404, headers: { "content-type": "application/problem+json" } },
+      );
+    }
+    const body = await request.json() as { transactionHash?: string };
+    tx.status = "confirmed";
+    tx.transactionHash = body.transactionHash;
+    tx.updatedAt = new Date().toISOString();
+    return HttpResponse.json(tx);
+  }),
+
+  http.put(`${API_BASE_URL}/crypto/transactions/:transactionId/dispute`, async ({ request, params }) => {
+    await delay(LATENCY);
+    const tx = TRANSACTIONS_DB.find((t) => t.id === params["transactionId"]);
+    if (!tx) {
+      return HttpResponse.json(
+        { type: "friendly_error", title: "Not found", detail: "Transação não encontrada.", status: 404 },
+        { status: 404, headers: { "content-type": "application/problem+json" } },
+      );
+    }
+    const body = await request.json() as { reason: string };
+    tx.status = "disputed";
+    tx.failedReason = body.reason;
+    tx.updatedAt = new Date().toISOString();
     return HttpResponse.json(tx);
   }),
 ];
