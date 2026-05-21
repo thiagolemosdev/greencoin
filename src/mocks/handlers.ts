@@ -364,6 +364,13 @@ const ITEMS_DB = [
 
 const MOCK_USER = { id: "user-1", email: "dev@example.com", name: "Dev User" };
 
+let SETTINGS_DB = {
+  notifications: { email: true, push: false, orderUpdates: true, marketAlerts: false },
+  theme: "system" as "light" | "dark" | "system",
+  language: "pt" as "pt" | "en",
+  security: { twoFactor: false },
+};
+
 export const handlers = [
   // Auth
   http.get(`${API_BASE_URL}/auth/me`, async () => {
@@ -488,13 +495,6 @@ export const handlers = [
   }),
 
   // Settings
-  let SETTINGS_DB = {
-    notifications: { email: true, push: false, orderUpdates: true, marketAlerts: false },
-    theme: "system" as "light" | "dark" | "system",
-    language: "pt" as "pt" | "en",
-    security: { twoFactor: false },
-  };
-
   http.get(`${API_BASE_URL}/settings`, async () => {
     await delay(LATENCY);
     return HttpResponse.json(SETTINGS_DB);
