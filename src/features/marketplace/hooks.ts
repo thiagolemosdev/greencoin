@@ -28,10 +28,10 @@ export function useAcceptCryptoOffer() {
     mutationFn: (data: AcceptOfferOutput) => cryptoTransactionApi.acceptOffer(data),
     onSuccess: (transaction) => {
       queryClient.invalidateQueries({
-        queryKey: queryKeys.crypto.marketplace.offers().queryKey,
+        queryKey: queryKeys.cryptoMarketplace.offers().queryKey,
       });
       queryClient.invalidateQueries({
-        queryKey: queryKeys.crypto.transactions.my().queryKey,
+        queryKey: queryKeys.cryptoTransactions.my().queryKey,
       });
       toast.success('Oferta aceita! Transação criada.');
     },
