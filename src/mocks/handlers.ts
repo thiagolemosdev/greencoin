@@ -703,12 +703,15 @@ export const handlers = [
 
   // ==================== TRANSACTIONS ====================
 
-  http.get(`${API_BASE_URL}/crypto/transactions`, async () => {
+  http.get(`${API_BASE_URL}/crypto/transactions`, async ({ request }) => {
     await delay(LATENCY);
-    return HttpResponse.json(
-      TRANSACTIONS_DB.filter((t) => t.buyerId === "user-1" || t.sellerId === "user-1")
-        .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
-    );
+    const url = new URL(request.url);
+    const status = url.searchParams.get("status");
+    const crypto = url.searchParams.get("crypto");
+    let txs = TRANSACTIONS_DB.filter((t) => t.buyerId === "user-1" || t.sellerId === "user-1");
+    if (status) txs = txs.filter((t) => t.status === status);
+    if (crypto) txs = txs.filter((t) => t.crypto === crypto);
+    return HttpResponse.json(txs.sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
   }),
 
   http.post(`${API_BASE_URL}/crypto/transactions`, async ({ request }) => {
