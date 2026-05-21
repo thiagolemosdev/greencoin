@@ -6,7 +6,8 @@ export type Profile = {
   name: string;
   email: string;
   bio?: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
+  createdAt?: string;
   updatedAt: string;
 };
 

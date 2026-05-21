@@ -452,6 +452,8 @@ export const handlers = [
       name: MOCK_USER.name,
       email: MOCK_USER.email,
       bio: "A sample bio.",
+      avatarUrl: null,
+      createdAt: "2024-01-15T10:00:00.000Z",
       updatedAt: new Date().toISOString(),
     });
   }),
@@ -462,8 +464,25 @@ export const handlers = [
     return HttpResponse.json({
       id: "profile-1",
       userId: params["userId"],
-      ...body,
+      name: body.name ?? MOCK_USER.name,
+      bio: body.bio ?? "A sample bio.",
       email: MOCK_USER.email,
+      avatarUrl: null,
+      createdAt: "2024-01-15T10:00:00.000Z",
+      updatedAt: new Date().toISOString(),
+    });
+  }),
+
+  http.post(`${API_BASE_URL}/profiles/:userId/avatar`, async ({ params }) => {
+    await delay(LATENCY);
+    return HttpResponse.json({
+      id: "profile-1",
+      userId: params["userId"],
+      name: MOCK_USER.name,
+      email: MOCK_USER.email,
+      bio: "A sample bio.",
+      avatarUrl: `https://api.dicebear.com/7.x/initials/svg?seed=${MOCK_USER.name}`,
+      createdAt: "2024-01-15T10:00:00.000Z",
       updatedAt: new Date().toISOString(),
     });
   }),
