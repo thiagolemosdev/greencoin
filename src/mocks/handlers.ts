@@ -443,10 +443,59 @@ export const handlers = [
   // Dashboard
   http.get(`${API_BASE_URL}/dashboard/summary`, async () => {
     await delay(LATENCY);
+
+    // Generate 7-day BTC price history
+    const baseBtcPrice = 95000;
+    const priceHistory = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      const noise = (Math.sin(i * 1.3) * 2800) + (Math.cos(i * 0.7) * 1500);
+      return {
+        day: d.toLocaleDateString("pt-BR", { weekday: "short" }),
+        price: Math.round(baseBtcPrice + noise),
+      };
+    });
+
+    const userWallets = WALLETS_DB.filter((w) => w.userId === "user-1");
+    const btcWallet = userWallets.find((w) => w.crypto === "BTC");
+    const usdtWallet = userWallets.find((w) => w.crypto === "USDT");
+
+    const userOrders = ORDERS_DB.filter((o) => o.userId === "user-1");
+    const userTxs = TRANSACTIONS_DB.filter(
+      (t) => t.buyerId === "user-1" || t.sellerId === "user-1",
+    );
+
     return HttpResponse.json({
-      totalItems: ITEMS_DB.length,
-      activeItems: ITEMS_DB.filter((i) => i.status === "active").length,
-      recentActivity: [],
+      balanceBtc: btcWallet?.balance ?? "0",
+      balanceUsdt: usdtWallet?.balance ?? "0",
+      openOrders: userOrders.filter((o) => o.status === "open").length,
+      pendingTransactions: userTxs.filter((t) => t.status === "pending").length,
+      completedTransactions: userTxs.filter((t) => t.status === "completed").length,
+      volume30d: "67560.00",
+      btcPrice: baseBtcPrice,
+      btcChange24h: 2.34,
+      usdtPrice: 1.0,
+      priceHistory,
+      recentOrders: userOrders.slice(0, 3).map((o) => ({
+        id: o.id,
+        type: o.type,
+        crypto: o.crypto,
+        amount: o.amount,
+        totalPrice: o.totalPrice,
+        currency: o.currency,
+        status: o.status,
+        createdAt: o.createdAt,
+      })),
+      recentTransactions: userTxs.slice(0, 3).map((t) => ({
+        id: t.id,
+        crypto: t.crypto,
+        amount: t.amount,
+        totalPrice: t.totalPrice,
+        currency: t.currency,
+        status: t.status,
+        role: t.sellerId === "user-1" ? "seller" : "buyer",
+        createdAt: t.createdAt,
+      })),
     });
   }),
 
