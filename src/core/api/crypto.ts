@@ -1,187 +1,141 @@
-import { httpResource } from '@core/http-resource';
+import { httpResource, defineApiRoute, defineApiRouteFn } from "@core/http-resource";
 import type {
   Wallet,
   Order,
   Transaction,
   MarketplaceOffer,
   WalletAddress,
-} from '@core/types/crypto';
+} from "@core/types/crypto";
 import type {
   CreateWalletOutput,
   CreateOrderOutput,
   AcceptOfferOutput,
   ConfirmTransactionOutput,
   MarketplaceFiltersOutput,
-} from '@core/schemas/crypto';
+} from "@core/schemas/crypto";
 
 // ==================== WALLETS ====================
 
+const walletRoutes = {
+  list:     defineApiRoute("GET",    "/crypto/wallets"),
+  create:   defineApiRoute("POST",   "/crypto/wallets"),
+  detail:   defineApiRouteFn<{ walletId: string }>("GET",  ({ walletId }) => `/crypto/wallets/${walletId}`),
+  addAddr:  defineApiRouteFn<{ walletId: string }>("POST", ({ walletId }) => `/crypto/wallets/${walletId}/addresses`),
+  listAddr: defineApiRouteFn<{ walletId: string }>("GET",  ({ walletId }) => `/crypto/wallets/${walletId}/addresses`),
+  verify:   defineApiRouteFn<{ walletId: string; addressId: string }>("POST", ({ walletId, addressId }) => `/crypto/wallets/${walletId}/addresses/${addressId}/verify`),
+};
+
 export const cryptoWalletApi = {
-  // Listar carteiras do usuário
   listWallets: () =>
-    httpResource<Wallet[]>({
-      method: 'GET',
-      path: '/crypto/wallets',
-    }),
+    httpResource<Wallet[]>(walletRoutes.list),
 
-  // Criar nova carteira
   createWallet: (data: CreateWalletOutput) =>
-    httpResource<Wallet>({
-      method: 'POST',
-      path: '/crypto/wallets',
-      body: data,
-    }),
+    httpResource<Wallet>(walletRoutes.create, { body: data }),
 
-  // Obter detalhes de uma carteira
   getWallet: (walletId: string) =>
-    httpResource<Wallet>({
-      method: 'GET',
-      path: `/crypto/wallets/${walletId}`,
-    }),
+    httpResource<Wallet>(walletRoutes.detail, { params: { walletId } }),
 
-  // Adicionar endereço a uma carteira
   addWalletAddress: (walletId: string, address: string) =>
-    httpResource<WalletAddress>({
-      method: 'POST',
-      path: `/crypto/wallets/${walletId}/addresses`,
-      body: { address },
-    }),
+    httpResource<WalletAddress>(walletRoutes.addAddr, { params: { walletId }, body: { address } }),
 
-  // Verificar endereço (prova de propriedade)
-  verifyWalletAddress: (walletId: string, addressId: string, signature: string) =>
-    httpResource<WalletAddress>({
-      method: 'POST',
-      path: `/crypto/wallets/${walletId}/addresses/${addressId}/verify`,
-      body: { signature },
-    }),
-
-  // Listar endereços de uma carteira
   listWalletAddresses: (walletId: string) =>
-    httpResource<WalletAddress[]>({
-      method: 'GET',
-      path: `/crypto/wallets/${walletId}/addresses`,
-    }),
+    httpResource<WalletAddress[]>(walletRoutes.listAddr, { params: { walletId } }),
+
+  verifyWalletAddress: (walletId: string, addressId: string, signature: string) =>
+    httpResource<WalletAddress>(walletRoutes.verify, { params: { walletId, addressId }, body: { signature } }),
 };
 
 // ==================== ORDERS ====================
 
+const orderRoutes = {
+  list:   defineApiRoute("GET",  "/crypto/orders"),
+  create: defineApiRoute("POST", "/crypto/orders"),
+  detail: defineApiRouteFn<{ orderId: string }>("GET", ({ orderId }) => `/crypto/orders/${orderId}`),
+  cancel: defineApiRouteFn<{ orderId: string }>("PUT", ({ orderId }) => `/crypto/orders/${orderId}/cancel`),
+  update: defineApiRouteFn<{ orderId: string }>("PUT", ({ orderId }) => `/crypto/orders/${orderId}`),
+};
+
 export const cryptoOrderApi = {
-  // Listar minhas ofertas
   listMyOrders: (filters?: Record<string, string>) =>
-    httpResource<Order[]>({
-      method: 'GET',
-      path: '/crypto/orders',
-      params: filters,
-    }),
+    httpResource<Order[]>(orderRoutes.list, { searchParams: filters }),
 
-  // Criar nova oferta
   createOrder: (data: CreateOrderOutput) =>
-    httpResource<Order>({
-      method: 'POST',
-      path: '/crypto/orders',
-      body: data,
-    }),
+    httpResource<Order>(orderRoutes.create, { body: data }),
 
-  // Obter detalhes de uma oferta
   getOrder: (orderId: string) =>
-    httpResource<Order>({
-      method: 'GET',
-      path: `/crypto/orders/${orderId}`,
-    }),
+    httpResource<Order>(orderRoutes.detail, { params: { orderId } }),
 
-  // Cancelar oferta
   cancelOrder: (orderId: string) =>
-    httpResource<Order>({
-      method: 'PUT',
-      path: `/crypto/orders/${orderId}/cancel`,
-    }),
+    httpResource<Order>(orderRoutes.cancel, { params: { orderId } }),
 
-  // Atualizar oferta
   updateOrder: (orderId: string, data: Partial<CreateOrderOutput>) =>
-    httpResource<Order>({
-      method: 'PUT',
-      path: `/crypto/orders/${orderId}`,
-      body: data,
-    }),
+    httpResource<Order>(orderRoutes.update, { params: { orderId }, body: data }),
 };
 
 // ==================== MARKETPLACE ====================
 
+const marketplaceRoutes = {
+  list:   defineApiRoute("GET", "/crypto/marketplace"),
+  detail: defineApiRouteFn<{ orderId: string }>("GET", ({ orderId }) => `/crypto/marketplace/${orderId}`),
+};
+
 export const cryptoMarketplaceApi = {
-  // Listar ofertas disponíveis
   listOffers: (filters?: MarketplaceFiltersOutput) =>
-    httpResource<MarketplaceOffer[]>({
-      method: 'GET',
-      path: '/crypto/marketplace',
-      params: filters as Record<string, string>,
+    httpResource<MarketplaceOffer[]>(marketplaceRoutes.list, {
+      searchParams: filters as Record<string, string> | undefined,
     }),
 
-  // Obter detalhes de uma oferta
   getOffer: (orderId: string) =>
-    httpResource<MarketplaceOffer>({
-      method: 'GET',
-      path: `/crypto/marketplace/${orderId}`,
-    }),
+    httpResource<MarketplaceOffer>(marketplaceRoutes.detail, { params: { orderId } }),
 };
 
 // ==================== TRANSACTIONS ====================
 
+const txRoutes = {
+  list:    defineApiRoute("GET",  "/crypto/transactions"),
+  accept:  defineApiRoute("POST", "/crypto/transactions"),
+  detail:  defineApiRouteFn<{ transactionId: string }>("GET", ({ transactionId }) => `/crypto/transactions/${transactionId}`),
+  confirm: defineApiRouteFn<{ transactionId: string }>("PUT", ({ transactionId }) => `/crypto/transactions/${transactionId}/confirm`),
+  dispute: defineApiRouteFn<{ transactionId: string }>("PUT", ({ transactionId }) => `/crypto/transactions/${transactionId}/dispute`),
+};
+
 export const cryptoTransactionApi = {
-  // Listar minhas transações
   listMyTransactions: (filters?: Record<string, string>) =>
-    httpResource<Transaction[]>({
-      method: 'GET',
-      path: '/crypto/transactions',
-      params: filters,
-    }),
+    httpResource<Transaction[]>(txRoutes.list, { searchParams: filters }),
 
-  // Aceitar uma oferta (cria transação)
   acceptOffer: (data: AcceptOfferOutput) =>
-    httpResource<Transaction>({
-      method: 'POST',
-      path: '/crypto/transactions',
-      body: data,
-    }),
+    httpResource<Transaction>(txRoutes.accept, { body: data }),
 
-  // Obter detalhes de uma transação
   getTransaction: (transactionId: string) =>
-    httpResource<Transaction>({
-      method: 'GET',
-      path: `/crypto/transactions/${transactionId}`,
-    }),
+    httpResource<Transaction>(txRoutes.detail, { params: { transactionId } }),
 
-  // Confirmar transação (envio de criptos)
   confirmTransaction: (data: ConfirmTransactionOutput) =>
-    httpResource<Transaction>({
-      method: 'PUT',
-      path: `/crypto/transactions/${data.transactionId}/confirm`,
+    httpResource<Transaction>(txRoutes.confirm, {
+      params: { transactionId: data.transactionId },
       body: { transactionHash: data.transactionHash },
     }),
 
-  // Cancelar/disputar transação
   disputeTransaction: (transactionId: string, reason: string) =>
-    httpResource<Transaction>({
-      method: 'PUT',
-      path: `/crypto/transactions/${transactionId}/dispute`,
+    httpResource<Transaction>(txRoutes.dispute, {
+      params: { transactionId },
       body: { reason },
     }),
 };
 
 // ==================== RATES ====================
 
-export const cryptoRateApi = {
-  // Obter taxa de câmbio atual
-  getCurrentRate: (crypto: 'BTC' | 'USDT', currency: 'USD' | 'BRL') =>
-    httpResource<{ rate: string; updatedAt: Date }>({
-      method: 'GET',
-      path: `/crypto/rates/${crypto}/${currency}`,
-    }),
+const rateRoutes = {
+  current: defineApiRouteFn<{ crypto: string; currency: string }>("GET", ({ crypto, currency }) => `/crypto/rates/${crypto}/${currency}`),
+  history: defineApiRouteFn<{ crypto: string; currency: string }>("GET", ({ crypto, currency }) => `/crypto/rates/${crypto}/${currency}/history`),
+};
 
-  // Obter histórico de taxas
-  getRateHistory: (crypto: 'BTC' | 'USDT', currency: 'USD' | 'BRL', days: number = 7) =>
-    httpResource<Array<{ date: string; rate: string }>>({
-      method: 'GET',
-      path: `/crypto/rates/${crypto}/${currency}/history`,
-      params: { days: days.toString() },
+export const cryptoRateApi = {
+  getCurrentRate: (crypto: "BTC" | "USDT", currency: "USD" | "BRL") =>
+    httpResource<{ rate: string; updatedAt: Date }>(rateRoutes.current, { params: { crypto, currency } }),
+
+  getRateHistory: (crypto: "BTC" | "USDT", currency: "USD" | "BRL", days = 7) =>
+    httpResource<Array<{ date: string; rate: string }>>(rateRoutes.history, {
+      params: { crypto, currency },
+      searchParams: { days },
     }),
 };
