@@ -15,9 +15,9 @@ export type AuthProviderProps = {
 };
 
 export function AuthProvider({ children, initialUser = null }: AuthProviderProps) {
-  const { accessToken, setTokens, clearSession } = useSessionStore();
+  const { setTokens, clearSession } = useSessionStore();
   const [user, setUser] = useState<AuthUser | null>(initialUser);
-  const [isLoading, setIsLoading] = useState(() => Boolean(accessToken));
+  const [isLoading, setIsLoading] = useState(true);
 
   const signIn = useCallback(
     async (credentials: { email: string; password: string }) => {
@@ -50,11 +50,9 @@ export function AuthProvider({ children, initialUser = null }: AuthProviderProps
   }, []);
 
   useEffect(() => {
-    if (!accessToken) {
-      setIsLoading(false);
-      return;
-    }
-    void refreshUser().finally(() => setIsLoading(false));
+    void refreshUser()
+      .catch(() => { /* unauthenticated — user stays null */ })
+      .finally(() => setIsLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
